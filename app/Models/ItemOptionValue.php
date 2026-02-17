@@ -18,6 +18,11 @@ class ItemOptionValue extends Model
         return $this->belongsTo(ItemOption::class, 'item_option_id');
     }
 
+    public function itemOption(): BelongsTo
+    {
+        return $this->belongsTo(ItemOption::class, 'item_option_id');
+    }
+
     public function variants(): BelongsToMany
     {
         return $this->belongsToMany(ItemVariant::class, 'item_variant_option_values');

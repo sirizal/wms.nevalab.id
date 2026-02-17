@@ -1,21 +1,21 @@
-# Step 1 Create Uom Resource
+# Please help to create Warehouse Data
 
-FilamentPHP v5 installed already.please always refer to filamentphp v5 docs.and follow below instructions :
+Tech stack : Laravel 12 , Postgresql , filamentphp v5
+Always follow Documentation Reference : Laravel 12 , filamentphp v5
 
-## Navigation
+## Model & Migration
 
-- Navigation Group:"Master Item"
-- Navigation Icon: heroicon-o-scale
-- Sort: 3
-- Globally Searchable
+- Warehouse with column : id,company_id,code,name,person_in_charge,phone_no,address,country_id,province_id,district_id,sub_district_id,village_id,postal_code,latitude,longitude,is_active,is_rent,rent_period(numeric),rent_cost(decimal(15,2)),rent_expired (datetime),square_meter
 
-## Form Schema
+## Eloquent Relationship
 
-### Use:
+- Company HasMany Warehouse , Warehouse BelongsTo Company
+- Warehouse make relation to country, province,district,subdistrict,village,person_in_charge to employee table
 
-TextInput::make('name')
-TextInput::make('code')
-TextInput::make('symbol')
-Select::make('uom_type_id') (relationship)
-Select::make('base_uom_id') (relationship to Uom, exclude self)
-TextInput::make('conversion_factor')
+## Filament v5 Resource
+
+- Create Full Resource using command ('php artisan create:filament-resource Warehouse --generate')
+- Create dependent select for Country , province , district , subdistrict , village on WarehouseForm
+- Navigation Group : "Warehouse Data"
+- Navigation Icon : refer to warehouse
+- Apply the translation to en and id for resource

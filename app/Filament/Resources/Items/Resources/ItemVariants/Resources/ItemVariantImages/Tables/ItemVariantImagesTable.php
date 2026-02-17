@@ -12,7 +12,9 @@ class ItemVariantImagesTable
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->label(__('filament.resources.items.relations.item_variant_images.fields.image')),
+                    ->label(__('filament.resources.items.relations.item_variant_images.fields.image'))
+                    ->disk('public')
+                    ->visibility('public'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label(__('filament.resources.items.relations.item_variant_images.fields.sort_order'))
                     ->sortable(),

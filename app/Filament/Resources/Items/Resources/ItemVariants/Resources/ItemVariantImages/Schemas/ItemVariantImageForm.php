@@ -15,6 +15,10 @@ class ItemVariantImageForm
                 Forms\Components\FileUpload::make('image')
                     ->label(__('filament.resources.items.relations.item_variant_images.fields.image'))
                     ->image()
+                    ->disk('public')
+                    ->directory('item-variants')
+                    ->visibility('public')
+                    ->maxSize(1024)
                     ->required(),
                 Forms\Components\TextInput::make('sort_order')
                     ->label(__('filament.resources.items.relations.item_variant_images.fields.sort_order'))

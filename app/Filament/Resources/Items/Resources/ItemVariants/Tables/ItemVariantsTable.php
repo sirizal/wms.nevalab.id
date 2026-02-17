@@ -25,7 +25,7 @@ class ItemVariantsTable
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('selling_price')
                     ->label(__('filament.resources.items.relations.item_variants.fields.selling_price'))
-                    ->money('USD')
+                    ->money('IDR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock_qty')
                     ->label(__('filament.resources.items.relations.item_variants.fields.stock_qty'))

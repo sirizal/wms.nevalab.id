@@ -21,8 +21,12 @@ class ItemExporter extends Exporter
                 ->label(__('filament.resources.items.fields.name')),
             ExportColumn::make('slug')
                 ->label(__('filament.resources.items.fields.slug')),
+            ExportColumn::make('customer_code')
+                ->label(__('filament.resources.items.fields.customer_code')),
             ExportColumn::make('description')
                 ->label(__('filament.resources.items.fields.description')),
+            ExportColumn::make('main_image')
+                ->label(__('filament.resources.items.fields.main_image')),
             ExportColumn::make('category.name')
                 ->label(__('filament.resources.items.fields.item_category')),
             ExportColumn::make('brand.name')

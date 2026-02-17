@@ -22,4 +22,9 @@ class ItemOption extends Model
     {
         return $this->hasMany(ItemOptionValue::class, 'item_option_id');
     }
+
+    public function itemOptionValues(): HasMany
+    {
+        return $this->hasMany(ItemOptionValue::class, 'item_option_id');
+    }
 }

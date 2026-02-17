@@ -11,7 +11,9 @@ class Item extends Model
     protected $fillable = [
         'name',
         'slug',
+        'customer_code',
         'description',
+        'main_image',
         'item_category_id',
         'brand_id',
         'uom_id',
@@ -21,6 +23,27 @@ class Item extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (Item $item) {
+            $item->createDefaultVariant();
+        });
+    }
+
+    public function createDefaultVariant(): ItemVariant
+    {
+        return ItemVariant::create([
+            'item_id' => $this->id,
+            'sku' => $this->slug,
+            'name' => $this->name,
+            'selling_price' => 0,
+            'cost_price' => 0,
+            'stock_qty' => 0,
+            'min_stock_qty' => 0,
+            'is_active' => true,
+        ]);
+    }
 
     public function category(): BelongsTo
     {
@@ -38,6 +61,11 @@ class Item extends Model
     }
 
     public function options(): HasMany
+    {
+        return $this->hasMany(ItemOption::class);
+    }
+
+    public function itemOptions(): HasMany
     {
         return $this->hasMany(ItemOption::class);
     }

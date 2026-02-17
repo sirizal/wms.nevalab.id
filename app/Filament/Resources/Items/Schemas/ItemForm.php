@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\Uom;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -28,9 +29,19 @@ class ItemForm
                     ->label(__('filament.resources.items.fields.slug'))
                     ->unique(Item::class, 'slug', ignoreRecord: true)
                     ->required(),
+                TextInput::make('customer_code')
+                    ->label(__('filament.resources.items.fields.customer_code'))
+                    ->nullable(),
                 Textarea::make('description')
                     ->label(__('filament.resources.items.fields.description'))
                     ->columnSpanFull(),
+                FileUpload::make('main_image')
+                    ->label(__('filament.resources.items.fields.main_image'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('items')
+                    ->visibility('public')
+                    ->maxSize(1024),
                 Select::make('item_category_id')
                     ->label(__('filament.resources.items.fields.item_category'))
                     ->options(fn () => ItemCategory::whereNotNull('parent_category_id')

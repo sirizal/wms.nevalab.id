@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\Items\RelationManagers;
 
 use App\Filament\Resources\Items\Resources\ItemVariants\ItemVariantResource;
+use App\Models\Item;
+use App\Models\ItemVariant;
 use Filament\Actions;
 use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -68,7 +71,7 @@ class ItemVariantsRelationManager extends RelationManager
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('selling_price')
                     ->label(__('filament.resources.items.relations.item_variants.fields.selling_price'))
-                    ->money('USD')
+                    ->money('IDR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock_qty')
                     ->label(__('filament.resources.items.relations.item_variants.fields.stock_qty'))
@@ -81,7 +84,15 @@ class ItemVariantsRelationManager extends RelationManager
                 Actions\CreateAction::make()
                     ->url(fn (): string => ItemVariantResource::getUrl('create', [
                         'item' => $this->getOwnerRecord(),
-                    ])),
+                    ]))
+                    ->visible(fn (): bool => ! $this->getOwnerRecord()->itemOptions()->exists()),
+                Actions\Action::make('generateVariants')
+                    ->label('Generate Variants')
+                    ->icon('heroicon-o-sparkles')
+                    ->action(function (): void {
+                        $this->generateVariants();
+                    })
+                    ->visible(fn (): bool => $this->getOwnerRecord()->itemOptions()->exists()),
             ])
             ->recordActions([
                 EditAction::make()
@@ -96,5 +107,97 @@ class ItemVariantsRelationManager extends RelationManager
                     Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    protected function generateVariants(): void
+    {
+        /** @var Item $item */
+        $item = $this->getOwnerRecord();
+
+        $options = $item->itemOptions()->with('values')->get();
+
+        if ($options->isEmpty()) {
+            Notification::make()
+                ->warning()
+                ->title('No Options Found')
+                ->body('Please add options to this item first.')
+                ->send();
+
+            return;
+        }
+
+        $optionValuesCollection = $options->pluck('values');
+
+        $combinations = $this->cartesian($optionValuesCollection->toArray());
+
+        $existingVariantKeys = $item->variants()
+            ->with('optionValues')
+            ->get()
+            ->map(fn (ItemVariant $variant) => $variant->getVariantKey())
+            ->toArray();
+
+        $newVariantsCount = 0;
+        $skippedVariantsCount = 0;
+
+        foreach ($combinations as $combination) {
+            $optionValueIds = array_column($combination, 'id');
+            $variantKey = ItemVariant::buildVariantKey($optionValueIds);
+
+            if (in_array($variantKey, $existingVariantKeys)) {
+                $skippedVariantsCount++;
+
+                continue;
+            }
+
+            $sku = ItemVariant::generateSku($item, $combination);
+
+            $variant = ItemVariant::create([
+                'item_id' => $item->id,
+                'sku' => $sku,
+                'name' => implode(' / ', array_column($combination, 'value')),
+                'selling_price' => 0,
+                'cost_price' => 0,
+                'stock_qty' => 0,
+                'min_stock_qty' => 0,
+                'is_active' => true,
+            ]);
+
+            $variant->syncOptionValues($optionValueIds);
+
+            $existingVariantKeys[] = $variantKey;
+            $newVariantsCount++;
+        }
+
+        Notification::make()
+            ->title('Variants Generated')
+            ->body("Created {$newVariantsCount} new variants. Skipped {$skippedVariantsCount} existing variants.")
+            ->success()
+            ->send();
+
+        $this->dispatch('refreshTable');
+    }
+
+    protected function cartesian(array $arrays): array
+    {
+        if (empty($arrays)) {
+            return [[]];
+        }
+
+        $result = [[]];
+
+        foreach ($arrays as $index => $currentArray) {
+            $append = [];
+
+            foreach ($result as $product) {
+                foreach ($currentArray as $item) {
+                    $product[$index] = $item;
+                    $append[] = $product;
+                }
+            }
+
+            $result = $append;
+        }
+
+        return $result;
     }
 }

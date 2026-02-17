@@ -10,6 +10,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -29,6 +30,10 @@ class ItemsTable
                     ->label(__('filament.resources.items.fields.slug'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('customer_code')
+                    ->label(__('filament.resources.items.fields.customer_code'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('category.name')
                     ->label(__('filament.resources.items.fields.item_category'))
                     ->searchable()
@@ -41,6 +46,10 @@ class ItemsTable
                     ->label(__('filament.resources.items.fields.uom'))
                     ->searchable()
                     ->sortable(),
+                ImageColumn::make('main_image')
+                    ->label(__('filament.resources.items.fields.main_image'))
+                    ->disk('public')
+                    ->visibility('public'),
                 IconColumn::make('is_active')
                     ->label(__('filament.resources.items.fields.is_active'))
                     ->boolean(),
